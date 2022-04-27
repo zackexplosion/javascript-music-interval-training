@@ -91,12 +91,11 @@ export default {
   // }
 
     function onMessage(event) {
-      // console.log(event)
+      console.log(event)
       // const [channel, number, value] = event.data;
       const [channel, number] = event.data;
       if (channel > 130) { // pressed
-        const note = NOTES.find(_ => _.index === number)
-        self.playerPlayedNotes.push(note.name)
+        self.handlePlayerInput(number)
       }
     }
 
@@ -161,16 +160,22 @@ export default {
         resolve()
       })
     },
-    virtualKeyBoardPressed(pitch ) {
+    handlePlayerInput(pitch){
+      if (this.playerPlayedNotes.length >= 2) {
+        this.playerPlayedNotes = []
+      }
 
-      pitch += 12
+
       try {
         const note = NOTES.find(_ => _.index === pitch)
         this.playerPlayedNotes.push(note.name)
       } catch (error) {
         // console.log
       }
-
+    },
+    virtualKeyBoardPressed(pitch ) {
+      pitch += 12
+      this.handlePlayerInput(pitch)
       this.playSound(pitch)
     },
     playSound(pitch = 60) {
@@ -202,6 +207,8 @@ export default {
 
       let note1 = false
       let note2 = false
+
+
       let n1Index = this.playerPlayedNotes.length - 2
       if (n1Index <= 0) n1Index = 0
 
@@ -249,5 +256,10 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
 }
 </style>

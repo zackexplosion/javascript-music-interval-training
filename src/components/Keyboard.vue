@@ -44,15 +44,19 @@ export default {
   margin:0 auto;
   max-width: 880px;
   position: relative;
+  display: block;
+  width: 100%;
+  height: 350px;
 }
 .white,
 .black {
   float: left;
+  box-sizing: border-box;
 }
 
 .white {
   height: 300px;
-  width: 12%;
+  width: 12.5%;
   border: 2px solid black;
   display: inline-block;
   cursor: pointer;
@@ -90,15 +94,15 @@ export default {
 }
 
 .f-sharp  {
-  left:47%;
+  left:47.5%;
 }
 
 .g-sharp  {
-  left:59.5%;
+  left:60%;
 }
 
 .a-sharp  {
-  left:72%;
+  left:73%;
 }
 
 </style>
