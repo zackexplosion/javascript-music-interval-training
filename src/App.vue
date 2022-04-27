@@ -8,9 +8,15 @@
 
 
   <div style="height: 150px">
-    <h1 style="height:40px">{{playedNotes.join(' ')}}</h1>
+    <h2 v-if="started">請跟著彈</h2>
+    <h1
+      style="height:40px"
+    >{{playedNotes.join(' ')}}</h1>
     <!-- <h1 v-show="playedNotes.length <= 0">點擊Play開始或重新播放</h1> -->
-    <h1 style="height:40px">{{playerPlayedNotes.join(' ')}} </h1>
+    <h1
+    style="height:40px"
+    class="answer"
+    :class="isAnswerCorrect">{{playerPlayedNotes.join(' ')}}</h1>
   </div>
   <Keyboard @sheet-pressed="e => virtualKeyBoardPressed(e)"/>
 </template>
@@ -65,8 +71,10 @@ export default {
   },
   data() {
     return {
+      started: false,
       playedNotes: [],
       playerPlayedNotes: [],
+      isAnswerCorrect: '',
       audioPlayer: undefined
     }
   },
@@ -135,13 +143,10 @@ export default {
   },
   methods: {
     async start() {
+      this.started = true
       this.playedNotes = []
       this.playerPlayedNotes = []
       this.playTest()
-
-    },
-    showPlayNote(noteName) {
-      this.playedNotes.push(noteName)
     },
     async playTest(count = 2) {
       return new Promise(async(  resolve) => {
@@ -152,11 +157,9 @@ export default {
           // notes_to_play.push(NOTES[index])
           // p.push(this.playSound(NOTES[index]))
           let noteToPlay = NOTES[index]
-          this.showPlayNote(noteToPlay.name)
+          this.playedNotes.push(noteToPlay.name)
           await this.playSound(noteToPlay.index)
         }
-
-
         resolve()
       })
     },
@@ -164,7 +167,6 @@ export default {
       if (this.playerPlayedNotes.length >= 2) {
         this.playerPlayedNotes = []
       }
-
 
       try {
         const note = NOTES.find(_ => _.index === pitch)
@@ -200,9 +202,10 @@ export default {
       })
     },
     matchTestNotes(){
-      const NEXT_RUN_DELAY = 500
+      this.isAnswerCorrect = ''
+      const NEXT_RUN_DELAY = 1000
       // const self = this
-      if(this.playedNotes.length < 2) return
+      if(this.playedNotes.length < 2 || this.playerPlayedNotes.length < 2) return
 
 
       let note1 = false
@@ -227,11 +230,14 @@ export default {
         note2 = true
       }
 
-      if(note1 && note2) {
+      if ( note1 && note2) {
         // delay next run
+        this.isAnswerCorrect = 'correct'
         setTimeout(() => {
           this.start()
         }, NEXT_RUN_DELAY)
+      }else {
+        this.isAnswerCorrect = 'wrong'
       }
       // console.log(this.playedNotes)
       // console.log(v)
@@ -261,5 +267,21 @@ export default {
 body {
   margin: 0;
   padding: 0;
+}
+
+</style>
+
+<style scoped>
+
+.answer.wrong {
+  color: red;
+}
+
+.answer.correct {
+  color: green;
+}
+h1,h2 {
+  padding:0;
+  margin:0;
 }
 </style>
