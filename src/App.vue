@@ -91,7 +91,7 @@ export default {
   // }
 
     function onMessage(event) {
-      console.log(event)
+      // console.log(event)
       // const [channel, number, value] = event.data;
       const [channel, number] = event.data;
       if (channel > 130) { // pressed

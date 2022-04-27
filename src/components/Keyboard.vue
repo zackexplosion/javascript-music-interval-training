@@ -1,18 +1,12 @@
 <template>
   <div class="keyboard">
-    <div class="white" @click="e => this.play(e, 'C', baseKeyIndex * 12 + 0)"></div>
-    <div class="black c-sharp" @click="e => this.play(e, 'Db', baseKeyIndex * 12 + 1)"></div>
-    <div class="white" @click="e => this.play(e, 'D', baseKeyIndex * 12 + 2)"></div>
-    <div class="black d-sharp" @click="e => this.play(e, 'Eb', baseKeyIndex * 12 + 3)"></div>
-    <div class="white" @click="e => this.play(e, 'E', baseKeyIndex * 12 + 4)"></div>
-    <div class="white" @click="e => this.play(e, 'F', baseKeyIndex * 12 + 5)"></div>
-    <div class="black f-sharp" @click="e => this.play(e, 'Gb', baseKeyIndex * 12 + 6)"></div>
-    <div class="white" @click="e => this.play(e, 'G', baseKeyIndex * 12 + 7)"></div>
-    <div class="black g-sharp" @click="e => this.play(e, 'Ab', baseKeyIndex * 12 + 8)"></div>
-    <div class="white" @click="e => this.play(e, 'A', baseKeyIndex * 12 + 9)"></div>
-    <div class="black a-sharp" @click="e => this.play(e, 'Bb', baseKeyIndex * 12 + 10)"></div>
-    <div class="white" @click="e => this.play(e, 'B', baseKeyIndex * 12 + 11)"></div>
-    <div class="white" @click="e => this.play(e, 'C', (baseKeyIndex + 1) * 12 + 0)"></div>
+    <div
+      v-for="(k, _) in keys"
+      :key="_"
+      :class="k.class"
+      @click="e => this.play(e, k.pitch)"
+      @keydown="e => this.keypress(e, k)"
+    />
   </div>
 </template>
 
@@ -24,16 +18,123 @@ export default {
     player: Object
   },
   data() {
+    const baseKeyIndex = 4
     return {
-      baseKeyIndex: 4,
+      baseKeyIndex,
+      keys: [
+        {
+          class: 'white c',
+          pitch: baseKeyIndex * 12 + 0,
+          keycode: 'KeyA',
+          pressing: false
+        },
+        {
+          class: 'black c-sharp',
+          pitch: baseKeyIndex * 12 + 1,
+          keycode: 'KeyW',
+          pressing: false
+        },
+        {
+          class: 'white d',
+          pitch: baseKeyIndex * 12 + 2,
+          keycode: 'KeyS',
+          pressing: false
+        },
+        {
+          class: 'black d-sharp',
+          pitch: baseKeyIndex * 12 + 3,
+          keycode: 'KeyE',
+          pressing: false
+        },
+        {
+          class: 'white e',
+          pitch: baseKeyIndex * 12 + 4,
+          keycode: 'KeyD',
+          pressing: false
+        },
+        {
+          class: 'white f',
+          pitch: baseKeyIndex * 12 + 5,
+          keycode: 'KeyF',
+          pressing: false
+        },
+        {
+          class: 'black f-sharp',
+          pitch: baseKeyIndex * 12 + 6,
+          keycode: 'KeyT',
+          pressing: false
+        },
+        {
+          class: 'white g',
+          pitch: baseKeyIndex * 12 + 7,
+          keycode: 'KeyG',
+          pressing: false
+        },
+        {
+          class: 'black g-sharp',
+          pitch: baseKeyIndex * 12 + 8,
+          keycode: 'KeyY',
+          pressing: false
+        },
+        {
+          class: 'white a',
+          pitch: baseKeyIndex * 12 + 9,
+          keycode: 'KeyH',
+          pressing: false
+        },
+        {
+          class: 'black a-sharp',
+          pitch: baseKeyIndex * 12 + 10,
+          keycode: 'KeyU',
+          pressing: false
+        },
+        {
+          class: 'white b',
+          pitch: baseKeyIndex * 12 + 11,
+          keycode: 'KeyJ',
+          pressing: false
+        },
+        {
+          class: 'white c5',
+          pitch: (baseKeyIndex +1) * 12,
+          keycode: 'KeyK',
+          pressing: false
+        },
+      ]
     }
   },
-  // mounted() {
+  mounted() {
+    const self = this
+    window.addEventListener("keydown", e => {
+      // console.log(String.fromCharCode(e.keyCode));
 
-  // },
+
+
+      const key = self.keys.find( _ => _.keycode === e.code)
+      if(!key) return
+
+
+      if(key.pressing) return
+
+      key.pressing = true
+
+
+      this.$emit('sheetPressed', key.pitch)
+    });
+
+    window.addEventListener("keyup", e => {
+      const key = self.keys.find( _ => _.keycode === e.code)
+      if(!key) return
+
+      key.pressing = false
+    });
+  },
   methods: {
-    play(e, noteName, pitch) {
+    play(e, pitch) {
       this.$emit('sheetPressed', pitch)
+    },
+    keydown(e, key) {
+      console.log(e, key)
     }
   }
 }
