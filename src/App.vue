@@ -1,13 +1,29 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
+  <!-- <img alt="Vue logo" src="./assets/logo.png"> -->
   <!-- <HelloWorld msg="Welcome to Your Vue.js App"/> -->
-  <h1>{{playedNotes}} </h1>
 
-  <h2>{{playerPlayedNotes}} </h2>
-  <button @click="start" > Start </button>
+  <!-- <button @click="start" > Play </button> -->
+
+  <img style="width: 8em;cursor: pointer;" src="./assets/play_and_refresh.png" @click="start"/>
+
+
+  <div style="height: 150px">
+    <h1 style="height:40px">{{playedNotes.join(' ')}}</h1>
+    <!-- <h1 v-show="playedNotes.length <= 0">點擊Play開始或重新播放</h1> -->
+    <h1 style="height:40px">{{playerPlayedNotes.join(' ')}} </h1>
+  </div>
+  <Keyboard @sheet-pressed="e => virtualKeyBoardPressed(e)"/>
 </template>
 
 <script>
+import Keyboard from '@/components/Keyboard.vue'
+
+var AudioContextFunc = window.AudioContext || window.webkitAudioContext;
+var audioContext = new AudioContextFunc();
+var player = new window.WebAudioFontPlayer();
+player.loader.decodeAfterLoading(audioContext, '_tone_0000_JCLive_sf2_file');
+
+
 const NOTES = [
   {
     index: 60,
@@ -45,12 +61,13 @@ const NOTES = [
 export default {
   name: 'App',
   components: {
-    // HelloWorld
+    Keyboard
   },
   data() {
     return {
       playedNotes: [],
-      playerPlayedNotes: []
+      playerPlayedNotes: [],
+      audioPlayer: undefined
     }
   },
   mounted() {
@@ -77,21 +94,10 @@ export default {
       // console.log(event)
       // const [channel, number, value] = event.data;
       const [channel, number] = event.data;
-      // const el = document.querySelector(`[data-number="${number}"]`);
-      // console.log("channel", channel, "number", number, "value", value);
-
-
-
       if (channel > 130) { // pressed
         const note = NOTES.find(_ => _.index === number)
         self.playerPlayedNotes.push(note.name)
       }
-      // sendMiddleC()
-      // setTimeout( => {
-      //   sendMiddleD()
-      // }, 1000)
-
-      // echoMIDIMessage(event)
     }
 
 
@@ -155,18 +161,33 @@ export default {
         resolve()
       })
     },
-    playSound(note = 60) {
+    virtualKeyBoardPressed(pitch ) {
+
+      pitch += 12
+      try {
+        const note = NOTES.find(_ => _.index === pitch)
+        this.playerPlayedNotes.push(note.name)
+      } catch (error) {
+        // console.log
+      }
+
+      this.playSound(pitch)
+    },
+    playSound(pitch = 60) {
+
 
       return new Promise((resolve) => {
+        player.queueWaveTable(audioContext, audioContext.destination, window._tone_0000_JCLive_sf2_file, 0, pitch, 0.75);
 
         var delay = 500
-
-        if (this.outputDevice) {
-          var noteOnMessage = [0x90, note, 0x7f];    // note on, middle C, full velocity
-          // var output = midiAccess.outputs.get(portID);
-          this.outputDevice.send(noteOnMessage); // sends the message.
-          this.outputDevice.send( [0x80, note, 0x7f], window.performance.now() + delay );
-        }
+        // player.queueWaveTable(audioContext, audioContext.destination, window._tone_0000_JCLive_sf2_file, 0, pitch, 0.75);
+        // player.queueWaveTable(audioContext, audioContext.destination, _tone_0090_JCLive_sf2_file, 0, pitch, 0.75);
+        // if (this.outputDevice) {
+        //   var noteOnMessage = [0x90, note, 0x7f];    // note on, middle C, full velocity
+        //   // var output = midiAccess.outputs.get(portID);
+        //   this.outputDevice.send(noteOnMessage); // sends the message.
+        //   this.outputDevice.send( [0x80, note, 0x7f], window.performance.now() + delay );
+        // }
 
         setTimeout(function() {
           resolve()
@@ -184,7 +205,7 @@ export default {
       let n1Index = this.playerPlayedNotes.length - 2
       if (n1Index <= 0) n1Index = 0
 
-      console.log('n1Index', n1Index)
+      // console.log('n1Index', n1Index)
       if (
         this.playerPlayedNotes.length > 0 &&
         this.playedNotes[0] === this.playerPlayedNotes[n1Index]) {
