@@ -4,8 +4,9 @@
       v-for="(k, _) in keys"
       :key="_"
       :class="k.class"
-      @click="e => this.play(e, k.pitch)"
-      @keydown="e => this.keypress(e, k)"
+      @mousedown="e => mousedown(k)"
+      @mouseup="e => mouseup(k)"
+      @mouseleave="e => mouseup(k)"
     />
   </div>
 </template>
@@ -106,35 +107,35 @@ export default {
   mounted() {
     const self = this
     window.addEventListener("keydown", e => {
-      // console.log(String.fromCharCode(e.keyCode));
-
-
-
       const key = self.keys.find( _ => _.keycode === e.code)
       if(!key) return
-
-
       if(key.pressing) return
 
       key.pressing = true
-
-
-      this.$emit('sheetPressed', key.pitch)
+      key.class = key.class + " active"
+      self.play(key.pitch)
     });
 
     window.addEventListener("keyup", e => {
       const key = self.keys.find( _ => _.keycode === e.code)
       if(!key) return
 
+      key.class = key.class.replace(' active', '')
+
       key.pressing = false
-    });
+    })
   },
   methods: {
-    play(e, pitch) {
+    play(pitch) {
       this.$emit('sheetPressed', pitch)
     },
-    keydown(e, key) {
-      console.log(e, key)
+    mousedown(key) {
+      key.pressing = true
+      key.class = key.class + " active"
+      this.play(key.pitch)
+    },
+    mouseup(key) {
+      key.class = key.class.replaceAll(' active', '')
     }
   }
 }
@@ -153,6 +154,10 @@ export default {
 .black {
   float: left;
   box-sizing: border-box;
+  -webkit-user-select:none;
+  -moz-user-select:none;
+  -o-user-select:none;
+  user-select:none;
 }
 
 .white {
@@ -177,12 +182,12 @@ export default {
 }
 
 .white:active,
-.white.Active {
+.white.active {
   background-color: #e0e0e0;
 }
 
 .black:active,
-.black.Active {
+.black.active {
   background-color: #404040;
 }
 
